@@ -38,6 +38,7 @@ def processed(P, x, y):
 def floodFill(M, x, y, replacementColor):
 	m = len(M)
 	n = len(M[0])
+	P = []
 	
 	# Initialize queue and append the starting pixel (x, y).
 	q = queue.Queue()
@@ -52,11 +53,14 @@ def floodFill(M, x, y, replacementColor):
 		coordX = coordPair.x
 		coordY = coordPair.y
 		
-		M[coordX][coordY] = replacementColor;
-		
-		for k in range(len(row)):
-			if (isSafe(M, m, n, coordX + row[k], coordY + col[k], target)):
-				q.put(Pair(coordX + row[k], coordY + col[k]))
+		if (not(processed(P, coordX, coordY))):
+			M[coordX][coordY] = replacementColor;
+			
+			for k in range(len(row)):
+				if (isSafe(M, m, n, coordX + row[k], coordY + col[k], target)):
+					q.put(Pair(coordX + row[k], coordY + col[k]))
+			
+			P.append(Pair(coordX, coordY))
 				
 	return M
 
@@ -95,43 +99,21 @@ col = [0, 1, 0, -1]
 
 # Image Processing.
 path = "picture.png"
-targetXY = (8, 10)
+targetXY = (2, 3)
 replacement = 'B'
 
+# Read pixel values.
 values = readImg(path)
+
+# Do floodfill.
 fillValues = floodFill(values, targetXY[0], targetXY[1], replacement)
+# print(fillValues)
 
-print(fillValues)
+# Create new image and draw it.
+newImg = Image.new('RGB', ((len(fillValues)), len(fillValues[0])))
 
-'''
-# Define colors: Red, Green, Blue, White, Black
-colors = ['R', 'G', 'B', 'W', 'X']
-
-# Define your picture size and the picture color matrix.
-picH = 10
-picW = 10
-
-pic = [['W' for x in range(picH)] for y in range(picW)]
-
-for i in range(picH):
-	for j in range(picW):
-		pic[i][j] = random.choice(colors)
-		
-# Print picture color matrix.
-print("---------------------")
-print("Unfilled picture")
-print("---------------------")
-for i in range(len(pic)):
-	print(pic[i])
+for i in range(len(fillValues)):
+	for j in range(len(fillValues[i])):
+		newImg.putpixel((i, j), colors[fillValues[i][j]])
 	
-# Process picture (W -> X at 3, 5)
-picF = floodFill(pic, 3, 5, 'X')
-print("*** Processing picture at 3, 5. Filling with X ***")
-
-# Print processed picture.
-print("---------------------")
-print("Filled picture")
-print("---------------------")
-for i in range(len(picF)):
-	print(picF[i])
-'''
+newImg.save("processedPic.png")
